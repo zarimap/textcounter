@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iframeへのテキスト送信（安全版）</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 8px;
+            font-size: 16px;
+        }
+        iframe {
+            width: 100%;
+            height: 200px;
+            border: 2px solid #ccc;
+            margin-top: 10px;
+        }
+        h3 {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>iframeへのテキスト送信</h2>
+
+    <div class="form-group">
+        <label for="input1">テキストボックス 1 :</label><br>
+        <input type="text" id="input1" placeholder="文字を入力してください...">
+    </div>
+
+    <div class="form-group">
+        <label for="input2">テキストボックス 2 :</label><br>
+        <input type="text" id="input2" placeholder="こちらも入力する度に送信されます...">
+    </div>
+
+    <hr>
+
+    <h3>出力先の iframe</h3>
+    <iframe id="targetIframe" srcdoc="
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: sans-serif; background-color: #f9f9f9; padding: 10px; }
+                .text-box { padding: 10px; background: white; border-left: 5px solid #007bff; min-height: 20px; word-break: break-all; }
+            </style>
+        </head>
+        <body>
+            <p>ここに送信された文字が表示されます：</p>
+            <div id='content' class='text-box'></div>
+
+            <script>
+                // 親画面（外側）からのメッセージを受け取るリスナー
+                window.addEventListener('message', (event) => {
+                    // 送られてきたテキストを表示エリアに反映
+                    document.getElementById('content').textContent = event.data;
+                });
+            </script>
+        </body>
+        </html>
+    "></iframe>
+
+    <script>
+        const iframe = document.getElementById('targetIframe');
+        const input1 = document.getElementById('input1');
+        const input2 = document.getElementById('input2');
+
+        // iframeの中に安全にメッセージを「送信」する関数
+        function sendToIframe(text) {
+            // '*' はターゲットのオリジンを制限しない設定（ローカルファイル用）
+            iframe.contentWindow.postMessage(text, '*');
+        }
+
+        // 入力されるたびに送信
+        input1.addEventListener('input', (e) => {
+            sendToIframe(e.target.value);
+        });
+
+        input2.addEventListener('input', (e) => {
+            sendToIframe(e.target.value);
+        });
+    </script>
+
+</body>
+</html>
